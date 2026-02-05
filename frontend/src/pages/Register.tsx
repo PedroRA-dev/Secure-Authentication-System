@@ -1,0 +1,113 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Mail, Lock, User } from 'lucide-react';
+import Input from '../components/Input';
+import Button from '../components/Button';
+import api from '../api/axios';
+
+const Register: React.FC = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      await api.post('/auth/register', { name, email, password });
+      navigate('/');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
+        <div>
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+            Create Account
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Join us today and get started
+          </p>
+        </div>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="rounded-md shadow-sm space-y-4">
+            <Input
+              label="Full Name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="John Doe"
+              icon={<User className="h-5 w-5" />}
+              required
+            />
+            <Input
+              label="Email Address"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              icon={<Mail className="h-5 w-5" />}
+              required
+            />
+            <Input
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              icon={<Lock className="h-5 w-5" />}
+              required
+            />
+            <Input
+              label="Confirm Password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="••••••••"
+              icon={<Lock className="h-5 w-5" />}
+              required
+            />
+          </div>
+
+          {error && (
+            <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <div>
+            <Button type="submit" isLoading={isLoading}>
+              Create Account
+            </Button>
+          </div>
+
+          <div className="text-sm text-center">
+            <span className="text-gray-600">Already have an account? </span>
+            <Link to="/" className="font-medium text-blue-600 hover:text-blue-500">
+              Sign in
+            </Link>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default Register;
